@@ -19,4 +19,4 @@ mongoose
   .catch(err => console.error(err));
 
 app.listen(5000, () => console.log("Server running on port 5000"));
-✅ 5. Your existing package.json
+
