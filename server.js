@@ -23,13 +23,18 @@ mongoose
     process.exit(1);
   });
 
-// User schema
+/* ============================
+   USER MODEL
+============================ */
 const userSchema = new mongoose.Schema(
   {
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true }, // hashed
     plan: { type: String, default: "Free Trial" },
-    trialStart: { type: String, default: () => new Date().toISOString().slice(0, 10) },
+    trialStart: {
+      type: String,
+      default: () => new Date().toISOString().slice(0, 10),
+    },
     budgets: [
       {
         category: String,
@@ -51,18 +56,20 @@ const userSchema = new mongoose.Schema(
 const User = mongoose.model("User", userSchema);
 
 // Helper
-async function findUser(email) {
-  return User.findOne({ email });
-}
+const findUser = (email) => User.findOne({ email });
 
-// Routes
+/* ============================
+   ROUTES
+============================ */
 
 // Health check
 app.get("/", (req, res) => {
   res.json({ ok: true, message: "Vaultwise API running" });
 });
 
-// REGISTER
+/* ============================
+   REGISTER
+============================ */
 app.post("/api/register", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -97,7 +104,9 @@ app.post("/api/register", async (req, res) => {
   }
 });
 
-// LOGIN
+/* ============================
+   LOGIN
+============================ */
 app.post("/api/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -121,7 +130,9 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
-// GET USER
+/* ============================
+   GET USER
+============================ */
 app.get("/api/user/:email", async (req, res) => {
   try {
     const user = await findUser(req.params.email);
@@ -140,7 +151,9 @@ app.get("/api/user/:email", async (req, res) => {
   }
 });
 
-// SAVE BUDGET
+/* ============================
+   SAVE BUDGET
+============================ */
 app.post("/api/budget", async (req, res) => {
   try {
     const { email, budgets } = req.body;
@@ -158,7 +171,9 @@ app.post("/api/budget", async (req, res) => {
   }
 });
 
-// SAVE PORTFOLIO
+/* ============================
+   SAVE PORTFOLIO
+============================ */
 app.post("/api/portfolio", async (req, res) => {
   try {
     const { email, portfolio } = req.body;
@@ -176,6 +191,8 @@ app.post("/api/portfolio", async (req, res) => {
   }
 });
 
-// Start server
+/* ============================
+   START SERVER
+============================ */
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`🚀 Vaultwise API running on port ${PORT}`));
