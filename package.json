@@ -4,12 +4,16 @@
   "description": "Vaultwise API backend (Express + MongoDB + JWT + Security Middleware)",
   "main": "server.js",
   "type": "module",
-"scripts": {
-  "start": "NODE_ENV=production node server.js",
-  "dev": "NODE_ENV=development nodemon server.js",
-  "lint": "eslint ."
-}
+  "scripts": {
+    "start": "NODE_ENV=production node server.js",
+    "dev": "NODE_ENV=development nodemon server.js",
+    "lint": "eslint ."
+  },
   "dependencies": {
+  },
+  "devDependencies": {
+  }
+}
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
