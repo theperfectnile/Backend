@@ -1,0 +1,46 @@
+{
+  "name": "vaultwise-backend",
+  "version": "1.1.0",
+  "description": "Vaultwise API backend (Express + MongoDB + JWT + Security Middleware)",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "NODE_ENV=production node server.js",
+    "dev": "NODE_ENV=development nodemon server.js",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "express-rate-limit": "^8.3.2",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.0",
+    "mongoose": "^9.4.1",
+    "nodemailer": "^8.0.5",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "eslint": "8.57.0",
+    "eslint-config-standard": "17.1.0",
+    "eslint-plugin-import": "2.29.1",
+    "eslint-plugin-n": "16.0.2",
+    "eslint-plugin-promise": "6.1.1",
+    "nodemon": "3.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "vaultwise",
+    "portfolio",
+    "finance",
+    "express",
+    "mongodb",
+    "jwt",
+    "api"
+  ],
+  "author": "Vaultwise",
+  "license": "MIT"
+}
