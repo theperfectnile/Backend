@@ -1,27 +1,29 @@
-require("dotenv").config();
-const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
-const bcrypt = require("bcryptjs");
+import dotenv from "dotenv";
+dotenv.config();
+
+import express from "express";
+import mongoose from "mongoose";
+import cors from "cors";
+import bcrypt from "bcryptjs";
 
 const app = express();
 
-// --- middleware ---
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-// --- mongo connection ---
-const MONGO_URI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/vaultwise";
+// MongoDB connection
+const MONGO_URI = process.env.MONGO_URI;
 
 mongoose
   .connect(MONGO_URI)
   .then(() => console.log("✅ MongoDB connected"))
   .catch((err) => {
-    console.error("MongoDB connection error:", err.message);
+    console.error("❌ MongoDB connection error:", err.message);
     process.exit(1);
   });
 
-// --- user model ---
+// User schema
 const userSchema = new mongoose.Schema(
   {
     email: { type: String, required: true, unique: true },
@@ -48,31 +50,28 @@ const userSchema = new mongoose.Schema(
 
 const User = mongoose.model("User", userSchema);
 
-// --- helpers ---
-async function findUserByEmail(email) {
+// Helper
+async function findUser(email) {
   return User.findOne({ email });
 }
 
-// --- routes ---
+// Routes
 
-// health check
+// Health check
 app.get("/", (req, res) => {
-  res.json({ ok: true, message: "Vaultwise API is running" });
+  res.json({ ok: true, message: "Vaultwise API running" });
 });
 
 // REGISTER
-// body: { email, password }
 app.post("/api/register", async (req, res) => {
   try {
-    const { email, password } = req.body || {};
-    if (!email || !password) {
-      return res.status(400).json({ error: "Email and password are required" });
-    }
+    const { email, password } = req.body;
 
-    const existing = await findUserByEmail(email);
-    if (existing) {
-      return res.status(409).json({ error: "User already exists" });
-    }
+    if (!email || !password)
+      return res.status(400).json({ error: "Email and password required" });
+
+    const exists = await findUser(email);
+    if (exists) return res.status(409).json({ error: "User already exists" });
 
     const hashed = await bcrypt.hash(password, 10);
 
@@ -99,25 +98,16 @@ app.post("/api/register", async (req, res) => {
 });
 
 // LOGIN
-// body: { email, password }
 app.post("/api/login", async (req, res) => {
   try {
-    const { email, password } = req.body || {};
-    if (!email || !password) {
-      return res.status(400).json({ error: "Email and password are required" });
-    }
+    const { email, password } = req.body;
 
-    const user = await findUserByEmail(email);
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
+    const user = await findUser(email);
+    if (!user) return res.status(404).json({ error: "User not found" });
 
     const ok = await bcrypt.compare(password, user.password);
-    if (!ok) {
-      return res.status(401).json({ error: "Invalid credentials" });
-    }
+    if (!ok) return res.status(401).json({ error: "Invalid credentials" });
 
-    // front‑end just needs user data; no token required for your current flow
     res.json({
       email: user.email,
       plan: user.plan,
@@ -131,11 +121,10 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
-// GET USER BY EMAIL
-// GET /api/user/:email
+// GET USER
 app.get("/api/user/:email", async (req, res) => {
   try {
-    const user = await findUserByEmail(req.params.email);
+    const user = await findUser(req.params.email);
     if (!user) return res.status(404).json({ error: "User not found" });
 
     res.json({
@@ -152,15 +141,11 @@ app.get("/api/user/:email", async (req, res) => {
 });
 
 // SAVE BUDGET
-// body: { email, budgets: [{ category, amount }] }
 app.post("/api/budget", async (req, res) => {
   try {
-    const { email, budgets } = req.body || {};
-    if (!email || !Array.isArray(budgets)) {
-      return res.status(400).json({ error: "Email and budgets array required" });
-    }
+    const { email, budgets } = req.body;
 
-    const user = await findUserByEmail(email);
+    const user = await findUser(email);
     if (!user) return res.status(404).json({ error: "User not found" });
 
     user.budgets = budgets;
@@ -174,15 +159,11 @@ app.post("/api/budget", async (req, res) => {
 });
 
 // SAVE PORTFOLIO
-// body: { email, portfolio: [{ name, value, sector, region }] }
 app.post("/api/portfolio", async (req, res) => {
   try {
-    const { email, portfolio } = req.body || {};
-    if (!email || !Array.isArray(portfolio)) {
-      return res.status(400).json({ error: "Email and portfolio array required" });
-    }
+    const { email, portfolio } = req.body;
 
-    const user = await findUserByEmail(email);
+    const user = await findUser(email);
     if (!user) return res.status(404).json({ error: "User not found" });
 
     user.portfolio = portfolio;
@@ -195,8 +176,6 @@ app.post("/api/portfolio", async (req, res) => {
   }
 });
 
-// --- start server ---
+// Start server
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
-  console.log(`🚀 Vaultwise API listening on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`🚀 Vaultwise API running on port ${PORT}`));
