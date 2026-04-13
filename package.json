@@ -5,6 +5,8 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
+  "lint": "eslint ."
+}
     "start": "NODE_ENV=production node server.js",
     "dev": "NODE_ENV=development nodemon server.js",
     "lint": "eslint ."
