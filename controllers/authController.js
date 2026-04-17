@@ -2,6 +2,9 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
+// ===============================
+// REGISTER
+// ===============================
 exports.register = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -19,6 +22,9 @@ exports.register = async (req, res) => {
   }
 };
 
+// ===============================
+// LOGIN
+// ===============================
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -33,6 +39,27 @@ exports.login = async (req, res) => {
 
     res.json({ token });
   } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// ===============================
+// FORGOT PASSWORD (TEMP VERSION)
+// ===============================
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "Email not found" });
+    }
+
+    // No email sending yet — just simulate success
+    res.json({ message: "Password reset link sent (simulation)" });
+
+  } catch (err) {
+    console.error("Forgot password error:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
