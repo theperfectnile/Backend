@@ -1,11 +1,9 @@
-const FinanceEntry = require("./models/FinanceEntry");
+const FinanceEntry = require("../models/FinanceEntry");
 
 exports.addEntry = async (req, res) => {
   try {
-    const userId = req.user.id;
-
     const entry = await FinanceEntry.create({
-      userId,
+      userId: req.user.id,
       ...req.body
     });
 
@@ -17,36 +15,29 @@ exports.addEntry = async (req, res) => {
 
 exports.getAll = async (req, res) => {
   try {
-    const userId = req.user.id;
-
-    const entries = await FinanceEntry.find({ userId }).sort({ year: 1 });
-
+    const entries = await FinanceEntry.find({ userId: req.user.id }).sort({ date: -1 });
     res.json(entries);
   } catch (err) {
-    res.status(500).json({ message: "Error loading history" });
+    res.status(500).json({ message: "Error loading entries" });
   }
 };
 
 exports.summary = async (req, res) => {
   try {
-    const userId = req.user.id;
-
-    const latest = await FinanceEntry.findOne({ userId }).sort({ year: -1 });
+    const latest = await FinanceEntry.findOne({ userId: req.user.id }).sort({ date: -1 });
 
     if (!latest) {
       return res.json({
         monthlyIncome: 0,
         monthlyExpenses: 0,
-        netSavings: 0,
-        portfolioValue: 0
+        netSavings: 0
       });
     }
 
     res.json({
       monthlyIncome: latest.income,
       monthlyExpenses: latest.expenses,
-      netSavings: latest.income - latest.expenses,
-      portfolioValue: latest.portfolio
+      netSavings: latest.income - latest.expenses
     });
   } catch (err) {
     res.status(500).json({ message: "Error loading summary" });
@@ -55,9 +46,7 @@ exports.summary = async (req, res) => {
 
 exports.analyze = async (req, res) => {
   try {
-    const userId = req.user.id;
-
-    const entries = await FinanceEntry.find({ userId });
+    const entries = await FinanceEntry.find({ userId: req.user.id }).sort({ date: 1 });
 
     if (entries.length < 2) {
       return res.json({ message: "Not enough data for insights" });
