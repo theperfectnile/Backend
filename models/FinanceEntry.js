@@ -7,19 +7,15 @@ const FinanceEntrySchema = new mongoose.Schema(
       ref: "User",
       required: true
     },
-    type: {
-      type: String,
-      enum: ["income", "expense"],
-      required: true
-    },
-    category: {
-      type: String,
-      required: true
-    },
-    amount: {
-      type: Number,
-      required: true
-    },
+
+    month: { type: String, required: true },
+    year: { type: Number, required: true },
+
+    monthlyIncome: { type: Number, required: true },
+    monthlyExpenses: { type: Number, required: true },
+    portfolioValue: { type: Number, required: true },
+    savingsGoal: { type: Number, required: true },
+
     date: {
       type: Date,
       default: Date.now
