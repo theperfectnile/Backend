@@ -59,7 +59,7 @@ exports.forgotPassword = async (req, res) => {
     res.json({ message: "Password reset link sent (simulation)" });
 
   } catch (err) {
-    console.error("Forgot password error:", err);
-    res.status(500).json({ message: "Server error" });
-  }
-};
+  console.error("REGISTER ERROR:", err);
+  res.status(500).json({ message: "Server error" });
+}
+ 
