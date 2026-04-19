@@ -18,6 +18,7 @@ exports.register = async (req, res) => {
 
     res.json({ message: "Registered successfully" });
   } catch (err) {
+    console.error("REGISTER ERROR:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -39,6 +40,7 @@ exports.login = async (req, res) => {
 
     res.json({ token });
   } catch (err) {
+    console.error("LOGIN ERROR:", err);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -55,11 +57,10 @@ exports.forgotPassword = async (req, res) => {
       return res.status(404).json({ message: "Email not found" });
     }
 
-    // No email sending yet — just simulate success
     res.json({ message: "Password reset link sent (simulation)" });
 
   } catch (err) {
-  console.error("REGISTER ERROR:", err);
-  res.status(500).json({ message: "Server error" });
-}
- 
+    console.error("FORGOT PASSWORD ERROR:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
