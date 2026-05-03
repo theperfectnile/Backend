@@ -29,6 +29,7 @@ app.use(express.json());
 // API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/finance", financeRoutes);
+const moneyPersonalityRoutes = require("./routes/moneyPersonalityRoutes");
 
 // MongoDB Connection
 mongoose
