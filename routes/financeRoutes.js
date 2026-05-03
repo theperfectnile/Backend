@@ -13,5 +13,6 @@ router.post("/add", auth, addEntry);
 router.get("/all", auth, getAll);
 router.get("/summary", auth, summary);
 router.post("/analyze", auth, analyze);
+router.get("/history", auth, getAll);
 
 module.exports = router;
