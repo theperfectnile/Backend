@@ -30,6 +30,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/finance", financeRoutes);
 const moneyPersonalityRoutes = require("./routes/moneyPersonalityRoutes");
+app.use("/api/money-personality", moneyPersonalityRoutes);
 
 // MongoDB Connection
 mongoose
