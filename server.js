@@ -31,7 +31,10 @@ app.use("/api/auth", authRoutes);
 app.use("/api/finance", financeRoutes);
 const moneyPersonalityRoutes = require("./routes/moneyPersonalityRoutes");
 app.use("/api/money-personality", moneyPersonalityRoutes);
-
+// ⭐ NEW ROUTES 
+app.use("/api/missions", require("./routes/missions"));
+app.use("/api/xp", require("./routes/xp"));
+app.use("/api/survey", require("./routes/survey"));
 // MongoDB Connection
 mongoose
   .connect(process.env.MONGO_URI, {
