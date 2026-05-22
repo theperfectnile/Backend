@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Survey = require("../models/Survey");
-const auth = require("../middleware/auth");
+const auth = require("../middleware/authMiddleware");
 
 // SAVE survey
 router.post("/", auth, async (req, res) => {
