@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Mission = require("../models/Mission");
-const auth = require("../middleware/auth");
+const auth = require("../middleware/authMiddleware");
 
 // GET missions
 router.get("/", auth, async (req, res) => {
