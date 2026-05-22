@@ -1,15 +1,24 @@
 const express = require("express");
 const router = express.Router();
-const Mission = require("../models/Mission");
 const auth = require("../middleware/authMiddleware");
+const Mission = require("../models/Mission");
 
-// GET missions
+// ===============================
+// GET USER MISSIONS (from DB)
+// ===============================
 router.get("/", auth, async (req, res) => {
-  const data = await Mission.findOne({ userId: req.user.id });
-  res.json(data || null);
+  try {
+    const data = await Mission.findOne({ userId: req.user.id });
+    res.json(data || { missions: [], completed: [] });
+  } catch (err) {
+    console.error("MISSIONS GET ERROR:", err);
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
-// NEW: GET default missions (fixes 404)
+// ===============================
+// GET DEFAULT MISSIONS (frontend uses this)
+// ===============================
 router.get("/get", (req, res) => {
   const missions = [
     "Track your expenses for 3 days",
@@ -27,18 +36,33 @@ router.get("/get", (req, res) => {
   res.json({ missions });
 });
 
-module.exports = router;
-// SAVE missions
-router.post("/", auth, async (req, res) => {
-  const { missions, timestamp } = req.body;
+// ===============================
+// SAVE USER MISSIONS
+// ===============================
+router.post("/save", auth, async (req, res) => {
+  try {
+    const { missions, completed } = req.body;
 
-  const saved = await Mission.findOneAndUpdate(
-    { userId: req.user.id },
-    { missions, timestamp },
-    { upsert: true, new: true }
-  );
+    let record = await Mission.findOne({ userId: req.user.id });
 
-  res.json(saved);
+    if (!record) {
+      record = new Mission({
+        userId: req.user.id,
+        missions,
+        completed
+      });
+    } else {
+      record.missions = missions;
+      record.completed = completed;
+    }
+
+    await record.save();
+    res.json({ message: "Missions saved" });
+
+  } catch (err) {
+    console.error("MISSIONS SAVE ERROR:", err);
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
 module.exports = router;
