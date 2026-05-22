@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const XP = require("../models/XP");
-const auth = require("../middleware/auth");
+const XP = require("../models/xp");
+const auth = require("../middleware/authMiddleware");
 
 // GET XP
 router.get("/", auth, async (req, res) => {
