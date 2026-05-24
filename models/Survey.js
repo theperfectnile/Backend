@@ -1,11 +1,9 @@
 const mongoose = require("mongoose");
 
 const SurveySchema = new mongoose.Schema({
-  userId: String,
-  answers: Object,
-  lifeScore: Number,
-  personality: String,
-  timestamp: Number
+  userId: { type: String, required: true },
+  answers: { type: Array, default: [] },
+  createdAt: { type: Date, default: Date.now }
 });
 
 module.exports = mongoose.model("Survey", SurveySchema);
