@@ -76,3 +76,9 @@ exports.getUser = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+module.exports = {
+  register,
+  login,
+  forgotPassword,
+  getUser
+};
