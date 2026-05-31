@@ -11,6 +11,7 @@ router.post("/login", login);
 // Forgot password route
 router.post("/forgot-password", forgotPassword);
 
+// Get logged-in user
 router.get("/user", authMiddleware, getUser);
 
 module.exports = router;
