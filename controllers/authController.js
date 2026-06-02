@@ -65,7 +65,6 @@ exports.forgotPassword = async (req, res) => {
   }
 };
 // ⭐ GET LOGGED-IN USER
-const User = require("../models/User");
 
 exports.getUser = async (req, res) => {
   try {
