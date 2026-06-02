@@ -46,7 +46,7 @@ exports.login = async (req, res) => {
 };
 
 // ===============================
-// FORGOT PASSWORD (TEMP VERSION)
+// FORGOT PASSWORD
 // ===============================
 exports.forgotPassword = async (req, res) => {
   try {
@@ -64,8 +64,10 @@ exports.forgotPassword = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-// ⭐ GET LOGGED-IN USER
 
+// ===============================
+// GET LOGGED-IN USER
+// ===============================
 exports.getUser = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select("-password");
@@ -75,9 +77,13 @@ exports.getUser = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+// ===============================
+// EXPORTS
+// ===============================
 module.exports = {
-  register,
-  login,
-  forgotPassword,
-  getUser
+  register: exports.register,
+  login: exports.login,
+  forgotPassword: exports.forgotPassword,
+  getUser: exports.getUser
 };
