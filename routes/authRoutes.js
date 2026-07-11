@@ -14,5 +14,9 @@ router.post("/forgot-password", forgotPassword);
 // Get logged-in user
 router.get("/user", authMiddleware, getUser);
 
+router.post("/logout", (req, res) => {
+  res.json({ message: "Logged out" });
+});
+
 module.exports = router;
 
