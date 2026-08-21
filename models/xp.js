@@ -5,7 +5,7 @@ const XpSchema = new mongoose.Schema(
     userId: {
       type: String,
       required: true,
-      unique: true
+      index: true
     },
 
     xp: {
@@ -14,29 +14,28 @@ const XpSchema = new mongoose.Schema(
       min: 0
     },
 
-    log: {
-      type: [
-        {
-          amount: {
-            type: Number,
-            required: true
-          },
+    log: [
+      {
+        amount: {
+          type: Number,
+          required: true
+        },
 
-          reason: {
-            type: String,
-            default: "Habit completed"
-          },
+        reason: {
+          type: String,
+          default: "XP earned"
+        },
 
-          date: {
-            type: Date,
-            default: Date.now
-          }
+        date: {
+          type: Date,
+          default: Date.now
         }
-      ],
-      default: []
-    }
+      }
+    ]
   },
-  { timestamps: true }
+  {
+    timestamps: true
+  }
 );
 
 module.exports = mongoose.model("Xp", XpSchema);
