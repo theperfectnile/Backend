@@ -5,7 +5,7 @@ const XpSchema = new mongoose.Schema(
     userId: {
       type: String,
       required: true,
-      index: true
+      unique: true
     },
 
     xp: {
@@ -23,7 +23,7 @@ const XpSchema = new mongoose.Schema(
 
         reason: {
           type: String,
-          default: "XP earned"
+          default: "XP awarded"
         },
 
         date: {
