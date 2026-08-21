@@ -1,3 +1,4 @@
+console.log("OPENAI KEY:", process.env.OPENAI_API_KEY);
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
