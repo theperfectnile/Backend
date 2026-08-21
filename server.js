@@ -35,6 +35,7 @@ app.use("/api/money-personality", moneyPersonalityRoutes);
 app.use("/api/missions", require("./routes/missions"));
 app.use("/api/xp", require("./routes/xp"));
 app.use("/api/survey", require("./routes/survey"));
+app.use("/api/habits", require("./routes/habits"));
 app.use("/api/subscription", require("./routes/subscriptionRoutes"));
 // MongoDB Connection
 mongoose
