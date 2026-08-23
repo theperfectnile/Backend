@@ -149,18 +149,13 @@ COACHING RULES:
       }
     ];
 
-   // Ask OpenAI (NEW SDK)
-const completion = await client.chat.completions.create({
-  model: "gpt-4o-mini",
-  messages: [
-    { role: "system", content: instructions },
-    ...safeHistory,
-    { role: "user", content: message }
-  ]
-});
+   // ----------------------------------------
+// MOCK AI RESPONSE (FREE)
+// ----------------------------------------
 
-const reply = completion.choices[0].message.content;
+const reply = `Mock Coach: Based on your level (${level}) and XP (${currentXP}), you're doing great. Keep going!`;
 
+return res.json({ reply });
     // ----------------------------------------
     // Return response
     // ----------------------------------------
