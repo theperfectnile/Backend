@@ -156,13 +156,7 @@ COACHING RULES:
 const reply = `Mock Coach: Based on your level (${level}) and XP (${currentXP}), you're doing great. Keep going!`;
 
 return res.json({ reply });
-    // ----------------------------------------
-    // Return response
-    // ----------------------------------------
-
-    res.json({
-      reply
-    });
+  
 
   } catch (err) {
     console.error("AI COACH ERROR:", err);
