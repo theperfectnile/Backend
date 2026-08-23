@@ -36,6 +36,7 @@ app.use("/api/missions", require("./routes/missions"));
 app.use("/api/xp", require("./routes/xp"));
 app.use("/api/survey", require("./routes/survey"));
 app.use("/api/habits", require("./routes/habits"));
+app.use("/api/coach", require("./routes/coach"));
 app.use("/api/subscription", require("./routes/subscriptionRoutes"));
 // MongoDB Connection
 mongoose
