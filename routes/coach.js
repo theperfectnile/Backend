@@ -148,7 +148,10 @@ COACHING RULES:
         content: message
       }
     ];
-
+// ----------------------------------------
+// GLOBAL STATE (must be OUTSIDE the route)
+// ----------------------------------------
+const conversationState = {};
 // ----------------------------------------
 // SMART STATEFUL COACH (FREE)
 // ----------------------------------------
