@@ -149,50 +149,62 @@ COACHING RULES:
       }
     ];
 
- // ----------------------------------------
-// STATEFUL MOCK COACH (FREE, MORE "INTELLIGENT")
+// ----------------------------------------
+// INTELLIGENT STATEFUL MOCK COACH
 // ----------------------------------------
 
-// In a real app, you'd store this per user in the DB.
-// For now, it's just in-memory for testing.
-let lastQuestion = null;
+let conversationState = {
+  lastTopic: null,
+  lastAction: null
+};
 
 function generateCoachReply(message, level, currentXP, habitProgress) {
   const lower = message.toLowerCase().trim();
 
-  // If we previously asked "what do you want to focus on?"
-  if (lastQuestion === "focus_area") {
-    if (lower.includes("finance")) {
-      lastQuestion = "finance_plan";
-      return `Great, let’s focus on finance. At level ${level} with ${currentXP} XP, start by tracking every expense for the next 3 days. Then we’ll look for one thing to reduce.`;
-    }
-    if (lower.includes("exercise")) {
-      lastQuestion = "exercise_plan";
-      return `Awesome, exercise it is. Begin with a 10‑minute walk or stretch today. Log it to earn XP and build your habit (${habitProgress.exercise}%).`;
-    }
-    if (lower.includes("motivation")) {
-      lastQuestion = "motivation_plan";
-      return `Let’s work on motivation. Pick one tiny task you’ve been avoiding and do it now. That small win will boost your XP and confidence.`;
-    }
+  // Detect topic
+  const topics = ["exercise", "finance", "motivation", "cleaning", "cooking", "lifestyle"];
+  const topic = topics.find(t => lower.includes(t)) || conversationState.lastTopic || "general";
 
-    // If the user replies with something else, treat it as a custom focus
-    lastQuestion = "custom_plan";
-    return `Got it—you want to focus on "${message}". Let’s start by defining one small action you can take today related to that. What’s one thing you could do in the next 10 minutes?`;
+  // Update state
+  conversationState.lastTopic = topic;
+
+  // Reasoning layer
+  if (lower.includes("help") || lower.includes("tips") || lower.includes("advice")) {
+    switch (topic) {
+      case "exercise":
+        conversationState.lastAction = "exercise_tips";
+        return `You’re level ${level} with ${currentXP} XP. To improve exercise habits, start with small, consistent actions: walk 10 minutes daily, stretch after waking, and log each activity to earn XP. As your progress (${habitProgress.exercise}%) grows, add intensity gradually.`;
+      case "finance":
+        conversationState.lastAction = "finance_tips";
+        return `Let’s strengthen your finances. Begin by tracking every expense for three days. At level ${level}, focus on awareness first — then set a weekly savings goal. Each completed goal earns XP (${currentXP}) and builds discipline.`;
+      case "motivation":
+        conversationState.lastAction = "motivation_tips";
+        return `Motivation comes from momentum. Choose one small task and finish it now — that win will raise your XP (${currentXP}) and boost confidence.`;
+      default:
+        return `Tell me what area you’d like advice in — exercise, finance, or motivation — and I’ll tailor a plan for you.`;
+    }
   }
 
-  // If no active question, start by asking what to focus on
-  lastQuestion = "focus_area";
-  return `You’re level ${level} with ${currentXP} XP. What would you like to focus on right now—exercise, finance, or motivation?`;
+  // If user repeats same topic, deepen advice
+  if (topic === conversationState.lastTopic && conversationState.lastAction) {
+    switch (conversationState.lastAction) {
+      case "exercise_tips":
+        return `You’re building consistency — great work. Try scheduling workouts at the same time each day. Consistency beats intensity early on.`;
+      case "finance_tips":
+        return `You’re staying focused on finances. Review your spending categories and find one small cut — even $5 saved daily compounds fast.`;
+      case "motivation_tips":
+        return `Still working on motivation? Reflect on why your goals matter. Write one sentence about what success looks like for you.`;
+      default:
+        return `Keep going — your progress matters more than perfection.`;
+    }
+  }
+
+  // Default fallback
+  return `You’re level ${level} with ${currentXP} XP. What would you like to focus on — exercise, finance, or motivation?`;
 }
 
 const reply = generateCoachReply(message, level, currentXP, habitProgress);
 return res.json({ reply });
-
-
-  
-
-  } catch (err) {
-    console.error("AI COACH ERROR:", err);
 
     res.status(500).json({
       message: "AI Coach is temporarily unavailable."
