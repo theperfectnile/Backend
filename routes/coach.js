@@ -149,19 +149,17 @@ COACHING RULES:
       }
     ];
 
-    // ----------------------------------------
-    // Ask OpenAI
-    // ----------------------------------------
+   // Ask OpenAI (NEW SDK)
+const completion = await client.chat.completions.create({
+  model: "gpt-4o-mini",
+  messages: [
+    { role: "system", content: instructions },
+    ...safeHistory,
+    { role: "user", content: message }
+  ]
+});
 
-    const response = await client.responses.create({
-      model: "gpt-5.6-luna",
-      instructions,
-      input
-    });
-
-    const reply =
-      response.output_text ||
-      "I'm having trouble responding right now. Please try again.";
+const reply = completion.choices[0].message.content;
 
     // ----------------------------------------
     // Return response
