@@ -150,64 +150,91 @@ COACHING RULES:
     ];
 
   // ----------------------------------------
-// ADVANCED MOCK COACH (FREE)
+// FULL AI-LIKE MOCK COACH (FREE)
 // ----------------------------------------
 
-function detectIntent(message) {
+function analyzeIntent(message) {
   const lower = message.toLowerCase();
 
-  if (lower.includes("how") && lower.includes("use")) return "app_help";
-  if (lower.includes("what") && lower.includes("xp")) return "explain_xp";
-  if (lower.includes("level")) return "explain_level";
-  if (lower.includes("habit")) return "habit_help";
-  if (lower.includes("stuck") || lower.includes("lost")) return "motivation";
-  if (lower.includes("next") || lower.includes("do")) return "next_action";
+  // App usage questions
+  if (lower.includes("how") && (lower.includes("use") || lower.includes("work") || lower.includes("app"))) {
+    return "app_usage";
+  }
 
-  // fallback: general coaching
+  // Asking for better advice
+  if (lower.includes("advice") || lower.includes("help") || lower.includes("improve")) {
+    return "better_advice";
+  }
+
+  // Feeling stuck or confused
+  if (lower.includes("stuck") || lower.includes("lost") || lower.includes("confused")) {
+    return "stuck";
+  }
+
+  // Asking what to do next
+  if (lower.includes("next") || lower.includes("do")) {
+    return "next_step";
+  }
+
+  // Habit-specific questions
+  if (lower.includes("habit")) return "habit_explanation";
+
+  // Motivation
+  if (lower.includes("motivation") || lower.includes("lazy") || lower.includes("tired")) {
+    return "motivation";
+  }
+
+  // If none match, general coaching
   return "general";
 }
 
-function generateReply(intent, message, level, currentXP, habitProgress) {
+function generateAIReply(intent, message, level, currentXP, habitProgress) {
   switch (intent) {
-    case "app_help":
-      return `Vaultwise helps you build habits through small daily actions. 
-You earn XP for completing habits, and your level increases as you stay consistent. 
-Use the dashboard to track progress and choose one habit to focus on today.`;
+    case "app_usage":
+      return `Here’s how Vaultwise works:  
+• You choose habits you want to improve  
+• Each time you complete one, you earn XP  
+• XP increases your level  
+• Higher levels mean stronger consistency  
+Use the dashboard to track progress and tap a habit to log an action.`;
 
-    case "explain_xp":
-      return `XP measures your consistency. 
-Every time you complete a habit, you earn XP. 
-At ${currentXP} XP, you're building momentum — keep stacking small wins.`;
+    case "better_advice":
+      return `Let’s get you better advice.  
+Tell me what you’re trying to improve — exercise, finance, cleaning, cooking, or lifestyle — and I’ll help you build a simple plan based on your level (${level}) and XP (${currentXP}).`;
 
-    case "explain_level":
-      return `Your level reflects long‑term progress. 
-Level ${level} means you're showing commitment. 
-Focus on completing one habit today to move closer to the next level.`;
+    case "stuck":
+      return `Feeling stuck is normal.  
+Try one tiny action right now — even 2 minutes.  
+Small wins rebuild momentum and increase your XP (${currentXP}).  
+What’s one thing you feel stuck on?`;
 
-    case "habit_help":
-      return `Habits grow through repetition. 
-Pick one habit and commit to a tiny version of it today — even 2 minutes counts. 
-Your current habit progress: 
-Finance ${habitProgress.finance}%, Exercise ${habitProgress.exercise}%, Cleaning ${habitProgress.cleaning}%, Cooking ${habitProgress.cooking}%, Lifestyle ${habitProgress.lifestyle}%.`;
-
-    case "motivation":
-      return `Feeling stuck is normal. 
-Try doing one small action right now — even a 2‑minute task. 
-Small wins rebuild momentum and increase your XP (${currentXP}).`;
-
-    case "next_action":
-      return `Your next action should be simple and achievable. 
-Choose one habit and complete a tiny version of it today. 
+    case "next_step":
+      return `Your next step should be simple and achievable.  
+Pick one habit and complete a tiny version of it today.  
 This will boost your XP and strengthen your progress.`;
 
+    case "habit_explanation":
+      return `Habits grow through repetition.  
+Your current progress:  
+• Finance: ${habitProgress.finance}%  
+• Exercise: ${habitProgress.exercise}%  
+• Cleaning: ${habitProgress.cleaning}%  
+• Cooking: ${habitProgress.cooking}%  
+• Lifestyle: ${habitProgress.lifestyle}%  
+Choose one habit and I’ll help you improve it.`;
+
+    case "motivation":
+      return `Motivation comes from action, not waiting.  
+Do one small task now — it’ll boost your XP (${currentXP}) and help you feel more in control.`;
+
     default:
-      return `You're level ${level} with ${currentXP} XP. 
-Tell me what you're trying to improve, and I’ll help you take the next step.`;
+      return `You’re level ${level} with ${currentXP} XP.  
+Tell me what you want help with — habits, goals, motivation, or understanding the app — and I’ll guide you.`;
   }
 }
 
-const intent = detectIntent(message);
-const reply = generateReply(intent, message, level, currentXP, habitProgress);
+const intent = analyzeIntent(message);
+const reply = generateAIReply(intent, message, level, currentXP, habitProgress);
 
 return res.json({ reply });
 
