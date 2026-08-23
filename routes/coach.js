@@ -150,63 +150,58 @@ COACHING RULES:
     ];
 
 // ----------------------------------------
-// INTELLIGENT STATEFUL COACH (FREE)
+// SMART STATEFUL COACH (FREE)
 // ----------------------------------------
 
-let conversationState = {}; // store per user in DB later
+const conversationState = {}; // later replace with MongoDB per user
 
 function generateCoachReply(userId, message, level, currentXP, habitProgress) {
   const lower = message.toLowerCase().trim();
 
   // Initialize state if missing
   if (!conversationState[userId]) {
-    conversationState[userId] = { lastTopic: null, lastStep: "intro" };
+    conversationState[userId] = { step: "intro", topic: null };
   }
 
   const state = conversationState[userId];
 
-  // Step 1: detect topic
-  const topics = ["exercise", "finance", "motivation"];
-  const topic = topics.find(t => lower.includes(t)) || state.lastTopic;
-
-  // Step 2: reasoning based on state
-  if (state.lastStep === "intro") {
-    state.lastStep = "focus";
+  // Step 1: Intro
+  if (state.step === "intro") {
+    state.step = "focus";
     return `You’re level ${level} with ${currentXP} XP. What would you like to focus on right now — exercise, finance, or motivation?`;
   }
 
-  if (state.lastStep === "focus") {
-    if (topic) {
-      state.lastTopic = topic;
-      state.lastStep = "advice";
-      switch (topic) {
-        case "exercise":
-          return `Great choice! At level ${level}, start small: walk or stretch for 10 minutes today. Log it to earn XP (${currentXP}). As your habit grows (${habitProgress.exercise}%), we’ll add intensity.`;
-        case "finance":
-          return `Smart move. Begin by tracking every expense for three days. At level ${level}, awareness is key — then we’ll set a savings goal.`;
-        case "motivation":
-          return `Let’s boost motivation. Pick one small task and finish it now — that win will raise your XP (${currentXP}) and confidence.`;
-      }
-    } else {
-      return `I didn’t catch your focus area. Try saying “exercise,” “finance,” or “motivation.”`;
+  // Step 2: Focus selection
+  if (state.step === "focus") {
+    if (lower.includes("exercise")) {
+      state.topic = "exercise";
+      state.step = "advice";
+      return `Great choice! At level ${level}, start small: walk or stretch for 10 minutes today. Log it to earn XP (${currentXP}). As your habit grows (${habitProgress.exercise}%), we’ll add intensity.`;
     }
+    if (lower.includes("finance")) {
+      state.topic = "finance";
+      state.step = "advice";
+      return `Smart move. Begin by tracking every expense for three days. At level ${level}, awareness is key — then we’ll set a savings goal.`;
+    }
+    if (lower.includes("motivation")) {
+      state.topic = "motivation";
+      state.step = "advice";
+      return `Let’s boost motivation. Pick one small task and finish it now — that win will raise your XP (${currentXP}) and confidence.`;
+    }
+    return `I didn’t catch your focus area. Try saying “exercise,” “finance,” or “motivation.”`;
   }
 
-  if (state.lastStep === "advice") {
-    // Deepen advice if user continues same topic
-    if (topic === state.lastTopic) {
-      switch (topic) {
-        case "exercise":
-          return `You’re building consistency — great work. Try scheduling workouts at the same time each day. Consistency beats intensity early on.`;
-        case "finance":
-          return `You’re staying focused on finances. Review your spending categories and find one small cut — even $5 saved daily compounds fast.`;
-        case "motivation":
-          return `Still working on motivation? Reflect on why your goals matter. Write one sentence about what success looks like for you.`;
-      }
-    } else {
-      // Switch topics mid‑conversation
-      state.lastTopic = topic;
-      return `Switching gears to ${topic}. Let’s set one small goal for today to build momentum.`;
+  // Step 3: Advice stage — deepen guidance
+  if (state.step === "advice") {
+    switch (state.topic) {
+      case "exercise":
+        return `You’re building consistency — great work. Try scheduling workouts at the same time each day. Consistency beats intensity early on.`;
+      case "finance":
+        return `You’re staying focused on finances. Review your spending categories and find one small cut — even $5 saved daily compounds fast.`;
+      case "motivation":
+        return `Still working on motivation? Reflect on why your goals matter. Write one sentence about what success looks like for you.`;
+      default:
+        return `Keep going — your progress matters more than perfection.`;
     }
   }
 
