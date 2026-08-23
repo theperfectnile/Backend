@@ -149,13 +149,68 @@ COACHING RULES:
       }
     ];
 
-   // ----------------------------------------
-// MOCK AI RESPONSE (FREE)
+  // ----------------------------------------
+// ADVANCED MOCK COACH (FREE)
 // ----------------------------------------
 
-const reply = `Mock Coach: Based on your level (${level}) and XP (${currentXP}), you're doing great. Keep going!`;
+function detectIntent(message) {
+  const lower = message.toLowerCase();
+
+  if (lower.includes("how") && lower.includes("use")) return "app_help";
+  if (lower.includes("what") && lower.includes("xp")) return "explain_xp";
+  if (lower.includes("level")) return "explain_level";
+  if (lower.includes("habit")) return "habit_help";
+  if (lower.includes("stuck") || lower.includes("lost")) return "motivation";
+  if (lower.includes("next") || lower.includes("do")) return "next_action";
+
+  // fallback: general coaching
+  return "general";
+}
+
+function generateReply(intent, message, level, currentXP, habitProgress) {
+  switch (intent) {
+    case "app_help":
+      return `Vaultwise helps you build habits through small daily actions. 
+You earn XP for completing habits, and your level increases as you stay consistent. 
+Use the dashboard to track progress and choose one habit to focus on today.`;
+
+    case "explain_xp":
+      return `XP measures your consistency. 
+Every time you complete a habit, you earn XP. 
+At ${currentXP} XP, you're building momentum — keep stacking small wins.`;
+
+    case "explain_level":
+      return `Your level reflects long‑term progress. 
+Level ${level} means you're showing commitment. 
+Focus on completing one habit today to move closer to the next level.`;
+
+    case "habit_help":
+      return `Habits grow through repetition. 
+Pick one habit and commit to a tiny version of it today — even 2 minutes counts. 
+Your current habit progress: 
+Finance ${habitProgress.finance}%, Exercise ${habitProgress.exercise}%, Cleaning ${habitProgress.cleaning}%, Cooking ${habitProgress.cooking}%, Lifestyle ${habitProgress.lifestyle}%.`;
+
+    case "motivation":
+      return `Feeling stuck is normal. 
+Try doing one small action right now — even a 2‑minute task. 
+Small wins rebuild momentum and increase your XP (${currentXP}).`;
+
+    case "next_action":
+      return `Your next action should be simple and achievable. 
+Choose one habit and complete a tiny version of it today. 
+This will boost your XP and strengthen your progress.`;
+
+    default:
+      return `You're level ${level} with ${currentXP} XP. 
+Tell me what you're trying to improve, and I’ll help you take the next step.`;
+  }
+}
+
+const intent = detectIntent(message);
+const reply = generateReply(intent, message, level, currentXP, habitProgress);
 
 return res.json({ reply });
+
   
 
   } catch (err) {
