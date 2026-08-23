@@ -150,70 +150,44 @@ COACHING RULES:
     ];
 
  // ----------------------------------------
-// SEMANTIC MOCK COACH (FREE & INTELLIGENT)
+// STATEFUL MOCK COACH (FREE, MORE "INTELLIGENT")
 // ----------------------------------------
 
-let lastIntent = null;
+// In a real app, you'd store this per user in the DB.
+// For now, it's just in-memory for testing.
+let lastQuestion = null;
 
-function inferIntent(message) {
-  const lower = message.toLowerCase();
+function generateCoachReply(message, level, currentXP, habitProgress) {
+  const lower = message.toLowerCase().trim();
 
-  if (lower.includes("tip") || lower.includes("advice") || lower.includes("how")) return "advice";
-  if (lower.includes("exercise") || lower.includes("workout") || lower.includes("fitness")) return "exercise";
-  if (lower.includes("finance") || lower.includes("money") || lower.includes("budget")) return "finance";
-  if (lower.includes("motivation") || lower.includes("lazy") || lower.includes("tired")) return "motivation";
-  if (lower.includes("goal") || lower.includes("plan")) return "goal";
-  if (lower.includes("help") || lower.includes("use") || lower.includes("app")) return "app_help";
-  return "general";
-}
-
-function generateSmartReply(intent, message, level, currentXP, habitProgress) {
-  // Deepen advice if continuing same topic
-  if (lastIntent === intent) {
-    switch (intent) {
-      case "exercise":
-        return `You’re already focused on exercise — great consistency! Try alternating cardio and strength. Start with 10 minutes today and log it to earn XP (${currentXP}).`;
-      case "advice":
-        return `You’re asking for more advice — excellent curiosity. At level ${level}, focus on building consistency: short daily actions beat long sessions.`;
-      case "motivation":
-        return `Still working on motivation? Pair your workout with music or a reward. Momentum builds faster than motivation.`;
-      default:
-        return `Keep going — your progress matters more than perfection.`;
+  // If we previously asked "what do you want to focus on?"
+  if (lastQuestion === "focus_area") {
+    if (lower.includes("finance")) {
+      lastQuestion = "finance_plan";
+      return `Great, let’s focus on finance. At level ${level} with ${currentXP} XP, start by tracking every expense for the next 3 days. Then we’ll look for one thing to reduce.`;
     }
+    if (lower.includes("exercise")) {
+      lastQuestion = "exercise_plan";
+      return `Awesome, exercise it is. Begin with a 10‑minute walk or stretch today. Log it to earn XP and build your habit (${habitProgress.exercise}%).`;
+    }
+    if (lower.includes("motivation")) {
+      lastQuestion = "motivation_plan";
+      return `Let’s work on motivation. Pick one tiny task you’ve been avoiding and do it now. That small win will boost your XP and confidence.`;
+    }
+
+    // If the user replies with something else, treat it as a custom focus
+    lastQuestion = "custom_plan";
+    return `Got it—you want to focus on "${message}". Let’s start by defining one small action you can take today related to that. What’s one thing you could do in the next 10 minutes?`;
   }
 
-  // First‑time responses
-  switch (intent) {
-    case "exercise":
-      lastIntent = "exercise";
-      return `Let’s talk exercise. At level ${level}, start with small, repeatable actions:  
-• 10 minutes of walking or stretching  
-• Track it to earn XP (${currentXP})  
-• Gradually increase intensity as your habit grows (${habitProgress.exercise}%).`;
-    case "advice":
-      lastIntent = "advice";
-      return `Here’s a quick framework for improvement:  
-1️⃣ Pick one focus area (exercise, finance, lifestyle).  
-2️⃣ Set a micro‑goal for today.  
-3️⃣ Log it to earn XP and see progress.`;
-    case "motivation":
-      lastIntent = "motivation";
-      return `Motivation comes from momentum. Do one small task now — even 2 minutes. You’ll feel better and raise your XP (${currentXP}).`;
-    case "goal":
-      lastIntent = "goal";
-      return `Let’s set a goal. Choose one habit and commit to a daily action. You’ll see your XP (${currentXP}) rise quickly.`;
-    case "app_help":
-      lastIntent = "app_help";
-      return `Vaultwise tracks habits and rewards consistency. Complete actions to earn XP and level up. Use the dashboard to view progress.`;
-    default:
-      lastIntent = "general";
-      return `You’re level ${level} with ${currentXP} XP. What would you like to focus on — exercise, finance, or motivation?`;
-  }
+  // If no active question, start by asking what to focus on
+  lastQuestion = "focus_area";
+  return `You’re level ${level} with ${currentXP} XP. What would you like to focus on right now—exercise, finance, or motivation?`;
 }
 
-const intent = inferIntent(message);
-const reply = generateSmartReply(intent, message, level, currentXP, habitProgress);
+const reply = generateCoachReply(message, level, currentXP, habitProgress);
 return res.json({ reply });
+
 
   
 
