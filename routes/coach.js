@@ -9,7 +9,7 @@ const XP = require("../models/xp");
 // ======================================================
 // GLOBAL STATE (PERSISTS WHILE SERVER IS RUNNING)
 // ======================================================
-const conversationState = {};  
+const conversationState = {};
 
 // ======================================================
 // DYNAMIC ADVICE TEMPLATES
@@ -53,7 +53,6 @@ const adviceTemplates = {
 function getDynamicAdvice(topic, level, currentXP, habitProgress) {
   const options = adviceTemplates[topic];
   const pick = options[Math.floor(Math.random() * options.length)];
-
   return pick(level || currentXP || habitProgress[topic] || null);
 }
 
@@ -71,9 +70,9 @@ function getFollowUp() {
 }
 
 // ======================================================
-// STATEFUL COACH LOGIC (FREE)
+// STATEFUL COACH LOGIC (FREE + PERSISTENT TOPIC)
 // ======================================================
-function generateCoachReply(userId, message, level, currentXP, habitProgress) {
+async function generateCoachReply(userId, message, level, currentXP, habitProgress) {
   const lower = message.toLowerCase().trim();
 
   // Initialize state if missing
@@ -83,6 +82,15 @@ function generateCoachReply(userId, message, level, currentXP, habitProgress) {
 
   const state = conversationState[userId];
 
+  // Load last topic from MongoDB if available
+  if (!state.topic) {
+    const user = await User.findById(userId).select("lastTopic");
+    if (user?.lastTopic) {
+      state.topic = user.lastTopic;
+      state.step = "advice";
+    }
+  }
+
   // Step 1: Intro
   if (state.step === "intro") {
     state.step = "focus";
@@ -91,4 +99,14 @@ function generateCoachReply(userId, message, level, currentXP, habitProgress) {
 
   // Step 2: Topic selection
   if (state.step === "focus") {
-    const topics
+    const topics = ["exercise", "finance", "cooking", "cleaning", "lifestyle"];
+    const matchedTopic = topics.find(t => lower.includes(t));
+
+    if (matchedTopic) {
+      state.topic = matchedTopic;
+      state.step = "advice";
+
+      // Save topic to MongoDB
+      await User.findByIdAndUpdate(userId, { lastTopic: matchedTopic });
+
+      const advice = getDynamicAdvice
