@@ -97,16 +97,22 @@ async function generateCoachReply(userId, message, level, currentXP, habitProgre
     return `You’re level ${level} with ${currentXP} XP. What would you like to focus on — exercise, finance, cooking, cleaning, or lifestyle.`;
   }
 
-  // Step 2: Topic selection
-  if (state.step === "focus") {
-    const topics = ["exercise", "finance", "cooking", "cleaning", "lifestyle"];
-    const matchedTopic = topics.find(t => lower.includes(t));
+ // Step 2: Topic selection
+if (state.step === "focus") {
+  const topics = ["exercise", "finance", "cooking", "cleaning", "lifestyle"];
+  const matchedTopic = topics.find(t => lower.includes(t));
 
-    if (matchedTopic) {
-      state.topic = matchedTopic;
-      state.step = "advice";
+  if (matchedTopic) {
+    state.topic = matchedTopic;
+    state.step = "advice";
 
-      // Save topic to MongoDB
-      await User.findByIdAndUpdate(userId, { lastTopic: matchedTopic });
+    // Save topic to MongoDB
+    await User.findByIdAndUpdate(userId, { lastTopic: matchedTopic });
 
-      const advice = getDynamicAdvice
+    const advice = getDynamicAdvice(matchedTopic, level, currentXP, habitProgress);
+    return `${advice} ${getFollowUp()}`;
+  }
+
+  // ✅ Updated fallback message
+  return `I didn’t catch your focus area. Try saying one of: ${topics.join(", ")}.`;
+}
