@@ -12,100 +12,83 @@ const XP = require("../models/xp");
 const conversationState = {};  
 
 // ======================================================
+// DYNAMIC ADVICE TEMPLATES
+// ======================================================
+const adviceTemplates = {
+  exercise: [
+    (level) => `At level ${level}, consistency beats intensity. Try a short walk today.`,
+    (xp) => `Earn XP (${xp}) by doing 10 minutes of movement.`,
+    (progress) => `Your exercise progress is ${progress}%. Let’s bump it a little today.`,
+    () => `What kind of exercise feels doable right now.`
+  ],
+  finance: [
+    () => `Track every expense for three days — awareness is your first win.`,
+    () => `Cut one small cost today. Even $5 saved daily compounds fast.`,
+    (xp) => `Your XP (${xp}) shows discipline. Let’s set a tiny savings goal.`,
+    () => `What’s one financial habit you want to improve.`
+  ],
+  cooking: [
+    (xp) => `Earn XP (${xp}) by cooking one meal at home today.`,
+    () => `Try a simple recipe — pasta, stir‑fry, or tacos.`,
+    (progress) => `Your cooking progress is ${progress}%. Let’s raise it with one homemade meal.`,
+    () => `What ingredients do you already have at home.`
+  ],
+  cleaning: [
+    () => `Start with a 10‑minute tidy. Small wins build momentum.`,
+    () => `Pick one area — desk, kitchen, or closet — and reset it.`,
+    (progress) => `Your cleaning progress is ${progress}%. Let’s nudge it upward.`,
+    () => `What space would make you feel calmer if it were clean.`
+  ],
+  lifestyle: [
+    () => `Focus on balance — hydration, sleep, and movement.`,
+    (xp) => `Your XP (${xp}) shows growth. Let’s add one healthy habit today.`,
+    () => `Try a 5‑minute mindfulness break.`,
+    () => `What’s one lifestyle tweak that would make your day smoother.`
+  ]
+};
+
+// ======================================================
+// RANDOM ADVICE PICKER
+// ======================================================
+function getDynamicAdvice(topic, level, currentXP, habitProgress) {
+  const options = adviceTemplates[topic];
+  const pick = options[Math.floor(Math.random() * options.length)];
+
+  return pick(level || currentXP || habitProgress[topic] || null);
+}
+
+// ======================================================
+// CONVERSATIONAL FOLLOW‑UPS
+// ======================================================
+function getFollowUp() {
+  const followUps = [
+    "How does that sound.",
+    "Would that fit into your day.",
+    "Want to try that now.",
+    "What’s your next step."
+  ];
+  return followUps[Math.floor(Math.random() * followUps.length)];
+}
+
+// ======================================================
 // STATEFUL COACH LOGIC (FREE)
 // ======================================================
 function generateCoachReply(userId, message, level, currentXP, habitProgress) {
   const lower = message.toLowerCase().trim();
 
+  // Initialize state if missing
   if (!conversationState[userId]) {
     conversationState[userId] = { step: "intro", topic: null };
   }
 
   const state = conversationState[userId];
 
+  // Step 1: Intro
   if (state.step === "intro") {
     state.step = "focus";
-    return `You’re level ${level} with ${currentXP} XP. What would you like to focus on right now — exercise, finance, or motivation?`;
+    return `You’re level ${level} with ${currentXP} XP. What would you like to focus on — exercise, finance, cooking, cleaning, or lifestyle.`;
   }
 
+  // Step 2: Topic selection
   if (state.step === "focus") {
-    if (lower.includes("exercise")) {
-      state.topic = "exercise";
-      state.step = "advice";
-      return `Great choice! At level ${level}, start small: walk or stretch for 10 minutes today. Log it to earn XP (${currentXP}). As your habit grows (${habitProgress.exercise}%), we’ll add intensity.`;
-    }
-    if (lower.includes("finance")) {
-      state.topic = "finance";
-      state.step = "advice";
-      return `Smart move. Begin by tracking every expense for three days. Awareness first — then we’ll set a savings goal.`;
-    }
-    if (lower.includes("motivation")) {
-      state.topic = "motivation";
-      state.step = "advice";
-      return `Let’s boost motivation. Pick one small task and finish it now — that win will raise your XP (${currentXP}) and confidence.`;
-    }
-
-    return `I didn’t catch your focus area. Try saying “exercise,” “finance,” or “motivation.”`;
-  }
-
-  if (state.step === "advice") {
-    switch (state.topic) {
-      case "exercise":
-        return `You’re building consistency — great work. Try scheduling workouts at the same time each day. Consistency beats intensity early on.`;
-      case "finance":
-        return `You’re staying focused on finances. Review your spending categories and find one small cut — even $5 saved daily compounds fast.`;
-      case "motivation":
-        return `Still working on motivation? Reflect on why your goals matter. Write one sentence about what success looks like for you.`;
-      default:
-        return `Keep going — your progress matters more than perfection.`;
-    }
-  }
-
-  return `You’re level ${level} with ${currentXP} XP. What would you like to focus on — exercise, finance, or motivation?`;
-}
-
-// ======================================================
-// AI CHAT COACH ROUTE
-// ======================================================
-router.post("/chat", auth, async (req, res) => {
-  try {
-    const { message } = req.body;
-
-    if (!message || typeof message !== "string") {
-      return res.status(400).json({ message: "A message is required." });
-    }
-
-    const user = await User.findById(req.user.id).select("email");
-    if (!user) return res.status(404).json({ message: "User not found." });
-
-    const habit = await Habit.findOne({ userId: req.user.id });
-    const xp = await XP.findOne({ userId: req.user.id });
-
-    const habitProgress = habit?.progress || {
-      finance: 0,
-      exercise: 0,
-      cleaning: 0,
-      cooking: 0,
-      lifestyle: 0
-    };
-
-    const currentXP = xp?.xp || 0;
-    const level = Math.floor(currentXP / 100) + 1;
-
-    const reply = generateCoachReply(
-      req.user.id,
-      message,
-      level,
-      currentXP,
-      habitProgress
-    );
-
-    return res.json({ reply });
-
-  } catch (err) {
-    console.error("AI COACH ERROR:", err);
-    return res.status(500).json({ message: "AI Coach is temporarily unavailable." });
-  }
-});
-
-module.exports = router;
+    const topics
