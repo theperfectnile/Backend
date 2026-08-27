@@ -3,8 +3,10 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const dotenv = require("dotenv");
 
+const reportsRoutes = require("./routes/reportsRoutes");
 
 dotenv.config();
+
 
 const authRoutes = require("./routes/authRoutes");
 const financeRoutes = require("./routes/financeRoutes");
@@ -38,6 +40,7 @@ app.use("/api/survey", require("./routes/survey"));
 app.use("/api/habits", require("./routes/habits"));
 app.use("/api/coach", require("./routes/coach"));
 app.use("/api/subscription", require("./routes/subscriptionRoutes"));
+app.use("/api", reportsRoutes);
 // MongoDB Connection
 mongoose
   .connect(process.env.MONGO_URI, {
