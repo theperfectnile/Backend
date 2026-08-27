@@ -1,8 +1,4 @@
-import express from "express";
-import XP from "../models/xpModel.js";
-import Habit from "../models/habitModel.js";
-import Streak from "../models/streakModel.js";
-
+const express = require("express");
 const router = express.Router();
 
 // -------------------------------
@@ -10,14 +6,8 @@ const router = express.Router();
 // -------------------------------
 router.get("/xp/weekly", async (req, res) => {
   try {
-    const xpData = await XP.find({ userId: req.user.id })
-      .sort({ date: -1 })
-      .limit(7);
-
-    const totalXP = xpData.reduce((sum, x) => sum + x.amount, 0);
-    const change = "+12%"; // placeholder until you calculate week-over-week
-
-    res.json({ earned: totalXP, change });
+    // Replace with your XP model logic later
+    res.json({ earned: 320, change: "+12%" });
   } catch (err) {
     console.error("XP WEEKLY ERROR:", err);
     res.status(500).json({ error: "Failed to load XP weekly data" });
@@ -29,20 +19,18 @@ router.get("/xp/weekly", async (req, res) => {
 // -------------------------------
 router.get("/habits/weekly", async (req, res) => {
   try {
-    const habits = await Habit.find({ userId: req.user.id })
-      .sort({ date: -1 })
-      .limit(7);
-
-    const completed = habits.filter(h => h.progress >= 100).length;
-    const categories = {
-      finance: 80,
-      exercise: 90,
-      cleaning: 70,
-      cooking: 60,
-      lifestyle: 85
-    };
-
-    res.json({ completed, change: "+8%", categories });
+    // Replace with your Habit model logic later
+    res.json({
+      completed: 14,
+      change: "+8%",
+      categories: {
+        finance: 80,
+        exercise: 90,
+        cleaning: 70,
+        cooking: 60,
+        lifestyle: 85
+      }
+    });
   } catch (err) {
     console.error("HABITS WEEKLY ERROR:", err);
     res.status(500).json({ error: "Failed to load habits weekly data" });
@@ -54,12 +42,12 @@ router.get("/habits/weekly", async (req, res) => {
 // -------------------------------
 router.get("/streak", async (req, res) => {
   try {
-    const streak = await Streak.findOne({ userId: req.user.id });
-    res.json({ days: streak?.days ?? 0 });
+    // Replace with your Streak model logic later
+    res.json({ days: 7 });
   } catch (err) {
     console.error("STREAK ERROR:", err);
     res.status(500).json({ error: "Failed to load streak data" });
   }
 });
 
-export default router;
+module.exports = router;
