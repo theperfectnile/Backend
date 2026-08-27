@@ -70,19 +70,18 @@ function getFollowUp() {
 }
 
 // ======================================================
-// STATEFUL COACH LOGIC (FREE + PERSISTENT TOPIC)
+// STATEFUL COACH LOGIC
 // ======================================================
 async function generateCoachReply(userId, message, level, currentXP, habitProgress) {
   const lower = message.toLowerCase().trim();
 
-  // Initialize state if missing
   if (!conversationState[userId]) {
     conversationState[userId] = { step: "intro", topic: null };
   }
 
   const state = conversationState[userId];
 
-  // Load last topic from MongoDB if available
+  // Load last topic from DB
   if (!state.topic) {
     const user = await User.findById(userId).select("lastTopic");
     if (user?.lastTopic) {
@@ -97,22 +96,65 @@ async function generateCoachReply(userId, message, level, currentXP, habitProgre
     return `You’re level ${level} with ${currentXP} XP. What would you like to focus on — exercise, finance, cooking, cleaning, or lifestyle.`;
   }
 
- // Step 2: Topic selection
-if (state.step === "focus") {
-  const topics = ["exercise", "finance", "cooking", "cleaning", "lifestyle"];
-  const matchedTopic = topics.find(t => lower.includes(t));
+  // Step 2: Topic selection
+  if (state.step === "focus") {
+    const topics = ["exercise", "finance", "cooking", "cleaning", "lifestyle"];
+    const matchedTopic = topics.find(t => lower.includes(t));
 
-  if (matchedTopic) {
-    state.topic = matchedTopic;
-    state.step = "advice";
+    if (matchedTopic) {
+      state.topic = matchedTopic;
+      state.step = "advice";
 
-    // Save topic to MongoDB
-    await User.findByIdAndUpdate(userId, { lastTopic: matchedTopic });
+      await User.findByIdAndUpdate(userId, { lastTopic: matchedTopic });
 
-    const advice = getDynamicAdvice(matchedTopic, level, currentXP, habitProgress);
+      const advice = getDynamicAdvice(matchedTopic, level, currentXP, habitProgress);
+      return `${advice} ${getFollowUp()}`;
+    }
+
+    return `I didn’t catch your focus area. Try saying one of: ${topics.join(", ")}.`;
+  }
+
+  // Step 3: Ongoing advice
+  if (state.step === "advice") {
+    const topic = state.topic;
+    const advice = getDynamicAdvice(topic, level, currentXP, habitProgress);
     return `${advice} ${getFollowUp()}`;
   }
 
-  // ✅ Updated fallback message
-  return `I didn’t catch your focus area. Try saying one of: ${topics.join(", ")}.`;
+  return "Let’s keep going — what would you like to improve next.";
 }
+
+// ======================================================
+// ROUTE HANDLER
+// ======================================================
+router.post("/message", auth, async (req, res) => {
+  try {
+    const { message } = req.body;
+    const userId = req.user.id;
+
+    const user = await User.findById(userId);
+    const level = user.level || 1;
+    const currentXP = user.xp || 0;
+
+    const habits = await Habit.find({ userId });
+    const habitProgress = {
+      exercise: habits.find(h => h.category === "exercise")?.progress || 0,
+      finance: habits.find(h => h.category === "finance")?.progress || 0,
+      cooking: habits.find(h => h.category === "cooking")?.progress || 0,
+      cleaning: habits.find(h => h.category === "cleaning")?.progress || 0,
+      lifestyle: habits.find(h => h.category === "lifestyle")?.progress || 0
+    };
+
+    const reply = await generateCoachReply(userId, message, level, currentXP, habitProgress);
+
+    res.json({ reply });
+  } catch (err) {
+    console.error("COACH ERROR:", err);
+    res.status(500).json({ error: "Coach failed to respond" });
+  }
+});
+
+// ======================================================
+// EXPORT ROUTER
+// ======================================================
+module.exports = router;
